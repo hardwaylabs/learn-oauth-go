@@ -7,7 +7,7 @@ A complete implementation of OAuth 2.1 authorization code flow with PKCE in Go, 
 This project demonstrates the OAuth 2.1 authorization code flow through three interconnected applications:
 
 - **Authorization Server** (port 8081) - Handles user authentication and issues tokens
-- **Resource Server** (port 8082) - Protects and serves resources to authorized clients  
+- **Resource Server** (port 8082) - Protects and serves resources to authorized clients
 - **Client Application** (port 8080) - Initiates OAuth flow and accesses protected resources
 
 ## Quick start
@@ -17,19 +17,19 @@ This project demonstrates the OAuth 2.1 authorization code flow through three in
    go mod tidy
    ```
 
-2. **Start all three servers** (in separate terminals):
+1. **Start all three servers** (in separate terminals):
    ```bash
    # Terminal 1: Authorization Server
    go run cmd/auth-server/main.go
-   
-   # Terminal 2: Resource Server  
+
+   # Terminal 2: Resource Server
    go run cmd/resource-server/main.go
-   
+
    # Terminal 3: Client Application
    go run cmd/client/main.go
    ```
 
-3. **Begin OAuth flow:**
+1. **Begin OAuth flow:**
    - Open browser to http://localhost:8080
    - Click "Start OAuth Flow"
    - Login with demo credentials (alice/password123, bob/secret456, or carol/mypass789)
@@ -94,7 +94,7 @@ Authorization Request:
 /
 ├── cmd/
 │   ├── auth-server/     # Authorization server main
-│   ├── resource-server/ # Resource server main  
+│   ├── resource-server/ # Resource server main
 │   └── client/          # Client application main
 ├── internal/
 │   ├── auth/           # Authentication logic
@@ -110,7 +110,7 @@ Authorization Request:
 
 Three pre-configured user accounts are available:
 - **alice** / password123
-- **bob** / secret456  
+- **bob** / secret456
 - **carol** / mypass789
 
 Passwords are bcrypt-hashed for basic security demonstration.
@@ -120,10 +120,10 @@ Passwords are bcrypt-hashed for basic security demonstration.
 After running this demo, you will understand:
 
 1. **OAuth 2.1 message flow** - Complete request/response cycle
-2. **PKCE security mechanism** - How code verifiers prevent authorization code interception
-3. **Token-based authorization** - How access tokens authorize resource access
-4. **Security considerations** - State parameters, code expiration, token validation
-5. **Real-world implementation** - Practical OAuth server and client code
+1. **PKCE security mechanism** - How code verifiers prevent authorization code interception
+1. **Token-based authorization** - How access tokens authorize resource access
+1. **Security considerations** - State parameters, code expiration, token validation
+1. **Real-world implementation** - Practical OAuth server and client code
 
 ## API endpoints
 
@@ -132,7 +132,7 @@ After running this demo, you will understand:
 - `POST /login` - User login form handler
 - `POST /token` - Token exchange endpoint
 
-### Resource Server (port 8082)  
+### Resource Server (port 8082)
 - `GET /protected` - Protected resource (requires Bearer token)
 - `GET /userinfo` - User information endpoint (requires Bearer token)
 - `GET /health` - Health check endpoint
@@ -150,11 +150,11 @@ After running this demo, you will understand:
 This implementation provides a solid foundation for understanding OAuth 2.1. To extend it further:
 
 1. **Add refresh tokens** with rotation
-2. **Implement token introspection** for distributed validation
-3. **Add scopes and permissions** for fine-grained access control
-4. **Implement client authentication** for confidential clients
-5. **Add persistent storage** for production use
-6. **Implement additional grant types** (client credentials, device flow)
+1. **Implement token introspection** for distributed validation
+1. **Add scopes and permissions** for fine-grained access control
+1. **Implement client authentication** for confidential clients
+1. **Add persistent storage** for production use
+1. **Implement additional grant types** (client credentials, device flow)
 
 ## Security notes
 

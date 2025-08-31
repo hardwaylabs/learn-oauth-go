@@ -10,9 +10,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/pavelanni/learn-oauth-go/internal/logger"
-	"github.com/pavelanni/learn-oauth-go/internal/oauth"
-	"github.com/pavelanni/learn-oauth-go/internal/users"
+	"github.com/hardwaylabs/learn-oauth-go/internal/logger"
+	"github.com/hardwaylabs/learn-oauth-go/internal/oauth"
+	"github.com/hardwaylabs/learn-oauth-go/internal/users"
 )
 
 const (
@@ -61,13 +61,13 @@ func (as *AuthServer) authorize(w http.ResponseWriter, r *http.Request) {
 		Destination: "AUTH-SERVER",
 		MessageType: "Authorization Request",
 		Payload: map[string]interface{}{
-			"client_id":              clientID,
-			"redirect_uri":           redirectURI,
-			"scope":                  scope,
-			"state":                  state,
-			"code_challenge":         codeChallenge[:20] + "...",
-			"code_challenge_method":  codeChallengeMethod,
-			"response_type":          responseType,
+			"client_id":             clientID,
+			"redirect_uri":          redirectURI,
+			"scope":                 scope,
+			"state":                 state,
+			"code_challenge":        codeChallenge[:20] + "...",
+			"code_challenge_method": codeChallengeMethod,
+			"response_type":         responseType,
 		},
 	})
 
@@ -94,13 +94,13 @@ func (as *AuthServer) authorize(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]interface{}{
-		"ClientID":             clientID,
-		"ClientName":           ClientName,
-		"RedirectURI":          redirectURI,
-		"Scope":                scope,
-		"State":                state,
-		"CodeChallenge":        codeChallenge,
-		"CodeChallengeMethod":  codeChallengeMethod,
+		"ClientID":            clientID,
+		"ClientName":          ClientName,
+		"RedirectURI":         redirectURI,
+		"Scope":               scope,
+		"State":               state,
+		"CodeChallenge":       codeChallenge,
+		"CodeChallengeMethod": codeChallengeMethod,
 	}
 
 	as.templates.ExecuteTemplate(w, "login.html", data)
@@ -132,14 +132,14 @@ func (as *AuthServer) login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.LogError("AUTH-SERVER", err)
 		data := map[string]interface{}{
-			"ClientID":             clientID,
-			"ClientName":           ClientName,
-			"RedirectURI":          redirectURI,
-			"Scope":                scope,
-			"State":                state,
-			"CodeChallenge":        codeChallenge,
-			"CodeChallengeMethod":  codeChallengeMethod,
-			"Error":                "Invalid username or password",
+			"ClientID":            clientID,
+			"ClientName":          ClientName,
+			"RedirectURI":         redirectURI,
+			"Scope":               scope,
+			"State":               state,
+			"CodeChallenge":       codeChallenge,
+			"CodeChallengeMethod": codeChallengeMethod,
+			"Error":               "Invalid username or password",
 		}
 		as.templates.ExecuteTemplate(w, "login.html", data)
 		return
@@ -308,14 +308,14 @@ func (as *AuthServer) discovery(w http.ResponseWriter, r *http.Request) {
 	logger.LogOAuthMessage(logger.LogEntry{
 		Timestamp:   time.Now(),
 		Direction:   logger.Outgoing,
-		Source:      "AUTH-SERVER", 
+		Source:      "AUTH-SERVER",
 		Destination: "CLIENT",
 		MessageType: "Discovery Response",
 		Payload: map[string]interface{}{
-			"issuer":                 metadata.Issuer,
-			"authorization_endpoint": metadata.AuthorizationEndpoint,
-			"token_endpoint":         metadata.TokenEndpoint,
-			"registration_endpoint":  metadata.RegistrationEndpoint,
+			"issuer":                   metadata.Issuer,
+			"authorization_endpoint":   metadata.AuthorizationEndpoint,
+			"token_endpoint":           metadata.TokenEndpoint,
+			"registration_endpoint":    metadata.RegistrationEndpoint,
 			"response_types_supported": metadata.ResponseTypesSupported,
 			"grant_types_supported":    metadata.GrantTypesSupported,
 		},
@@ -346,11 +346,11 @@ func (as *AuthServer) clientRegistration(w http.ResponseWriter, r *http.Request)
 		Destination: "AUTH-SERVER",
 		MessageType: "Client Registration Request",
 		Payload: map[string]interface{}{
-			"redirect_uris":     req.RedirectURIs,
-			"client_name":       req.ClientName,
-			"application_type":  req.ApplicationType,
-			"response_types":    req.ResponseTypes,
-			"grant_types":       req.GrantTypes,
+			"redirect_uris":    req.RedirectURIs,
+			"client_name":      req.ClientName,
+			"application_type": req.ApplicationType,
+			"response_types":   req.ResponseTypes,
+			"grant_types":      req.GrantTypes,
 		},
 	})
 
@@ -408,7 +408,7 @@ func (as *AuthServer) clientRegistration(w http.ResponseWriter, r *http.Request)
 		TokenEndpointAuthMethod: tokenEndpointAuthMethod,
 		CreatedAt:               time.Now(),
 	}
-	
+
 	as.store.StoreClient(registeredClient)
 
 	// Create response
@@ -430,13 +430,13 @@ func (as *AuthServer) clientRegistration(w http.ResponseWriter, r *http.Request)
 		Destination: "CLIENT",
 		MessageType: "Client Registration Response",
 		Payload: map[string]interface{}{
-			"client_id":                clientID,
-			"client_secret":            "[REDACTED]",
-			"redirect_uris":            response.RedirectURIs,
-			"response_types":           response.ResponseTypes,
-			"grant_types":              response.GrantTypes,
-			"application_type":         response.ApplicationType,
-			"client_name":              response.ClientName,
+			"client_id":                  clientID,
+			"client_secret":              "[REDACTED]",
+			"redirect_uris":              response.RedirectURIs,
+			"response_types":             response.ResponseTypes,
+			"grant_types":                response.GrantTypes,
+			"application_type":           response.ApplicationType,
+			"client_name":                response.ClientName,
 			"token_endpoint_auth_method": response.TokenEndpointAuthMethod,
 		},
 	})

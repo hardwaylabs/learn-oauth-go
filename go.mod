@@ -1,4 +1,4 @@
-module github.com/pavelanni/learn-oauth-go
+module github.com/hardwaylabs/learn-oauth-go
 
 go 1.24.6
 

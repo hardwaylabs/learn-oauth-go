@@ -4,15 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-This is a learning project to implement OAuth 2.1 in Go. The goal is to create a multi-component system to understand OAuth message exchanges for implementing OAuth in an MCP server.
+This is a learning project to implement OAuth 2.1 in Go. The goal is to create a multi-component system to understand OAuth
+message exchanges for implementing OAuth in an MCP server.
 
 ## Project architecture
 
 The planned system consists of:
 
 1. **Client application** - requests resources from the provider
-2. **Resource provider** - serves resources only to authorized clients
-3. **Authorization server** - handles authentication (may be separate or integrated with resource provider)
+1. **Resource provider** - serves resources only to authorized clients
+1. **Authorization server** - handles authentication (may be separate or integrated with resource provider)
 
 All components should log and display OAuth messages in formatted text to demonstrate the authentication flow.
 

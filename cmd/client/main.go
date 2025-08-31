@@ -12,8 +12,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/pavelanni/learn-oauth-go/internal/logger"
-	"github.com/pavelanni/learn-oauth-go/internal/oauth"
+	"github.com/hardwaylabs/learn-oauth-go/internal/logger"
+	"github.com/hardwaylabs/learn-oauth-go/internal/oauth"
 )
 
 const (
