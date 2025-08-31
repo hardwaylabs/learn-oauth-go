@@ -675,7 +675,8 @@ This implementation now includes **Dynamic Client Registration**, a key feature 
 
 ### What is Dynamic Client Registration?
 
-Dynamic Client Registration allows OAuth clients to register themselves programmatically at runtime, without requiring manual pre-configuration by the authorization server administrator.
+Dynamic Client Registration allows OAuth clients to register themselves programmatically at runtime, without requiring manual
+pre-configuration by the authorization server administrator.
 
 ### Why is it important?
 
