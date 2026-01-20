@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -12,25 +13,25 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/hardwaylabs/learn-oauth-go/internal/logger"
 	"github.com/hardwaylabs/learn-oauth-go/internal/oauth"
-)
-
-const (
-	ResourceServerPort = ":8082"
-	AuthServerURL      = "http://localhost:8081"
+	"github.com/spf13/viper"
 )
 
 type ResourceServer struct {
-	store *oauth.Store
+	store         *oauth.Store
+	port          string
+	authServerURL string
 }
 
 func NewResourceServer() *ResourceServer {
 	return &ResourceServer{
-		store: oauth.NewStore(),
+		store:         oauth.NewStore(),
+		port:          viper.GetString("resource.port"),
+		authServerURL: viper.GetString("resource.auth_server_url"),
 	}
 }
 
 func (rs *ResourceServer) validateToken(token string) (*oauth.AccessToken, error) {
-	req, err := http.NewRequest("GET", AuthServerURL+"/validate", nil)
+	req, err := http.NewRequest("GET", rs.authServerURL+"/validate", nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create validation request: %w", err)
 	}
@@ -163,8 +164,31 @@ func (rs *ResourceServer) healthCheck(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func initConfig() {
+	// Set defaults
+	viper.SetDefault("resource.port", ":8082")
+	viper.SetDefault("resource.auth_server_url", "http://localhost:8081")
+
+	// Bind environment variables
+	viper.BindEnv("resource.port", "RESOURCE_PORT")
+	viper.BindEnv("resource.auth_server_url", "RESOURCE_AUTH_SERVER_URL")
+
+	// Define command-line flags
+	var port, authServerURL string
+	flag.StringVar(&port, "port", viper.GetString("resource.port"), "Resource server port")
+	flag.StringVar(&authServerURL, "auth-server-url", viper.GetString("resource.auth_server_url"), "Authorization server URL")
+	flag.Parse()
+
+	// Set viper values from flags (flags have highest priority)
+	viper.Set("resource.port", port)
+	viper.Set("resource.auth_server_url", authServerURL)
+}
+
 func main() {
-	logger.LogInfo("RESOURCE-SERVER", "Starting OAuth 2.1 Resource Server on port 8082")
+	initConfig()
+
+	resourcePort := viper.GetString("resource.port")
+	logger.LogInfo("RESOURCE-SERVER", fmt.Sprintf("Starting OAuth 2.1 Resource Server on port %s", resourcePort))
 
 	resourceServer := NewResourceServer()
 
@@ -188,7 +212,7 @@ func main() {
 	})
 
 	logger.LogInfo("RESOURCE-SERVER", "Server ready to serve protected resources")
-	if err := http.ListenAndServe(ResourceServerPort, r); err != nil {
+	if err := http.ListenAndServe(resourceServer.port, r); err != nil {
 		logger.LogError("RESOURCE-SERVER", err)
 	}
 }

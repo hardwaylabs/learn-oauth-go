@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -13,18 +14,16 @@ import (
 	"github.com/hardwaylabs/learn-oauth-go/internal/logger"
 	"github.com/hardwaylabs/learn-oauth-go/internal/oauth"
 	"github.com/hardwaylabs/learn-oauth-go/internal/users"
-)
-
-const (
-	AuthServerPort = ":8081"
-	ClientID       = "demo-client"
-	ClientName     = "Demo OAuth Client"
+	"github.com/spf13/viper"
 )
 
 type AuthServer struct {
-	store     *oauth.Store
-	userStore *users.UserStore
-	templates *template.Template
+	store      *oauth.Store
+	userStore  *users.UserStore
+	templates  *template.Template
+	port       string
+	clientID   string
+	clientName string
 }
 
 func NewAuthServer() (*AuthServer, error) {
@@ -39,9 +38,12 @@ func NewAuthServer() (*AuthServer, error) {
 	}
 
 	return &AuthServer{
-		store:     oauth.NewStore(),
-		userStore: userStore,
-		templates: templates,
+		store:      oauth.NewStore(),
+		userStore:  userStore,
+		templates:  templates,
+		port:       viper.GetString("auth.port"),
+		clientID:   viper.GetString("auth.client_id"),
+		clientName: viper.GetString("auth.client_name"),
 	}, nil
 }
 
@@ -77,13 +79,13 @@ func (as *AuthServer) authorize(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if client is the demo client or a dynamically registered client
-	if clientID != ClientID && !as.store.IsValidClient(clientID) {
+	if clientID != as.clientID && !as.store.IsValidClient(clientID) {
 		http.Error(w, "invalid_client", http.StatusBadRequest)
 		return
 	}
 
 	// Validate redirect URI for dynamically registered clients
-	if clientID != ClientID && !as.store.IsValidRedirectURI(clientID, redirectURI) {
+	if clientID != as.clientID && !as.store.IsValidRedirectURI(clientID, redirectURI) {
 		http.Error(w, "invalid_redirect_uri", http.StatusBadRequest)
 		return
 	}
@@ -95,7 +97,7 @@ func (as *AuthServer) authorize(w http.ResponseWriter, r *http.Request) {
 
 	data := map[string]interface{}{
 		"ClientID":            clientID,
-		"ClientName":          ClientName,
+		"ClientName":          as.clientName,
 		"RedirectURI":         redirectURI,
 		"Scope":               scope,
 		"State":               state,
@@ -133,7 +135,7 @@ func (as *AuthServer) login(w http.ResponseWriter, r *http.Request) {
 		logger.LogError("AUTH-SERVER", err)
 		data := map[string]interface{}{
 			"ClientID":            clientID,
-			"ClientName":          ClientName,
+			"ClientName":          as.clientName,
 			"RedirectURI":         redirectURI,
 			"Scope":               scope,
 			"State":               state,
@@ -226,7 +228,7 @@ func (as *AuthServer) token(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate client exists (either demo client or registered client)
-	if clientID != ClientID && !as.store.IsValidClient(clientID) {
+	if clientID != as.clientID && !as.store.IsValidClient(clientID) {
 		http.Error(w, "invalid_client", http.StatusBadRequest)
 		return
 	}
@@ -470,8 +472,35 @@ func (as *AuthServer) sendRegistrationError(w http.ResponseWriter, errorCode, er
 	json.NewEncoder(w).Encode(errorResponse)
 }
 
+func initConfig() {
+	// Set defaults
+	viper.SetDefault("auth.port", ":8081")
+	viper.SetDefault("auth.client_id", "demo-client")
+	viper.SetDefault("auth.client_name", "Demo OAuth Client")
+
+	// Bind environment variables
+	viper.BindEnv("auth.port", "AUTH_PORT")
+	viper.BindEnv("auth.client_id", "AUTH_CLIENT_ID")
+	viper.BindEnv("auth.client_name", "AUTH_CLIENT_NAME")
+
+	// Define command-line flags
+	var port, clientID, clientName string
+	flag.StringVar(&port, "port", viper.GetString("auth.port"), "Authorization server port")
+	flag.StringVar(&clientID, "client-id", viper.GetString("auth.client_id"), "Default OAuth client ID")
+	flag.StringVar(&clientName, "client-name", viper.GetString("auth.client_name"), "Default OAuth client name")
+	flag.Parse()
+
+	// Set viper values from flags (flags have highest priority)
+	viper.Set("auth.port", port)
+	viper.Set("auth.client_id", clientID)
+	viper.Set("auth.client_name", clientName)
+}
+
 func main() {
-	logger.LogInfo("AUTH-SERVER", "Starting OAuth 2.1 Authorization Server on port 8081")
+	initConfig()
+
+	authPort := viper.GetString("auth.port")
+	logger.LogInfo("AUTH-SERVER", fmt.Sprintf("Starting OAuth 2.1 Authorization Server on port %s", authPort))
 
 	authServer, err := NewAuthServer()
 	if err != nil {
@@ -490,7 +519,7 @@ func main() {
 	r.Get("/.well-known/oauth-authorization-server", authServer.discovery)
 
 	logger.LogInfo("AUTH-SERVER", "Server ready to handle OAuth requests")
-	if err := http.ListenAndServe(AuthServerPort, r); err != nil {
+	if err := http.ListenAndServe(authServer.port, r); err != nil {
 		logger.LogError("AUTH-SERVER", err)
 	}
 }

@@ -16,13 +16,13 @@
 </head>
 <body>
     <h1>OAuth 2.1 Demo Client</h1>
-    
+
     <div class="section">
         <h2>Client Application</h2>
         <p>This demo client will guide you through the OAuth 2.1 authorization code flow with PKCE.</p>
-        <p><strong>Client ID:</strong> demo-client</p>
-        <p><strong>Redirect URI:</strong> http://localhost:8080/callback</p>
-        <p><strong>Scope:</strong> read</p>
+        <p><strong>Client ID:</strong> {{.ClientID}}</p>
+        <p><strong>Redirect URI:</strong> {{.RedirectURI}}</p>
+        <p><strong>Scope:</strong> {{.Scope}}</p>
     </div>
 
     {{if .Error}}
